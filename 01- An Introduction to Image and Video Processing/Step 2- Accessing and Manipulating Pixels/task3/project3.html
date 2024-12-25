@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessing and Manipulating Pixels</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .canvas-container {
+            display: flex;
+            gap: 20px;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 40%;
+            height: auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Accessing and Manipulating Pixels</h1>
+    <video id="video"style="display:none;"src ="video.mp4" muted></video>
+    <div class="canvas-container">
+        <canvas id="originalCanvas"></canvas>
+        <canvas id="processedCanvas"></canvas>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const originalCtx = originalCanvas.getContext('2d');
+        const processedCtx = processedCanvas.getContext('2d');
+
+        video.addEventListener('loadedmetadata', () => {
+            originalCanvas.width = processedCanvas.width = video.videoWidth;
+            originalCanvas.height = processedCanvas.height = video.videoHeight;
+            video.play();
+        });
+
+        video.addEventListener('play', () => {
+            function drawFrame() {
+                if (!video.paused && !video.ended) {
+                    originalCtx.drawImage(video, 0, 0, originalCanvas.width, originalCanvas.height);
+                    const frame = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+                    const data = frame.data;
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                        data[i] = data[i + 1] = data[i + 2] = avg;
+                    }
+
+                    processedCtx.putImageData(frame, 0, 0);
+                    requestAnimationFrame(drawFrame);
+                }
+            }
+            drawFrame();
+        });
+    </script>
+</body>
+</html>
