@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Blur Effect</title>
+    <style>
+        canvas {
+            display: block;            margin: 20px auto;
+            border: 1px solid black;
+            max-width:90vw ;
+            max-height:90vh ;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Video Blur Effect</h1>
+    <input type="file" id="videoUpload" accept="video/*" style="display: block; margin: 20px auto;">
+    <video id="video" style="display: none;" autoplay muted loop></video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const videoUpload = document.getElementById('videoUpload');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        videoUpload.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+
+                // ضبط أبعاد الكانفاس مع الفيديو
+                video.addEventListener('loadeddata', () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    video.play();
+                    processVideo();
+                });
+            }
+        });
+
+        function processVideo() {
+            function processFrame() {
+                if (video.paused || video.ended) {
+                    return;
+                }
+
+                // رسم الإطار الحالي على الكانفاس
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                //الحصول على بيانات الفيديو
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const { width, height, data } = imageData;
+
+                // إنشاء نسخة جديدة من البيانات لتطبيق التمويه
+                const blurredData = new Uint8ClampedArray(data.length);
+
+                const kernelSize = 3; // حجم النافذة (3×3)
+                const halfKernel = Math.floor(kernelSize / 2);
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        let redSum = 0, greenSum = 0, blueSum = 0, count = 0;
+
+                        // حساب المتوسط ضمن النافذة
+                        for (let ky = -halfKernel; ky <= halfKernel; ky++) {
+                            for (let kx = -halfKernel; kx <= halfKernel; kx++) {
+                                const nx = x + kx;
+                                const ny = y + ky;
+
+                                // التأكد من أن البكسل داخل الحدود
+                                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                    const offset = (ny * width + nx) * 4;
+                                    redSum += data[offset];
+                                    greenSum += data[offset + 1];
+                                    blueSum += data[offset + 2];
+                                    count++;
+                                }
+                            }
+                        }
+
+                        const index = (y * width + x) * 4;
+                        blurredData[index] = redSum / count;      // Red
+                        blurredData[index + 1] = greenSum / count; // Green
+                        blurredData[index + 2] = blueSum / count;  // Blue
+                        blurredData[index + 3] = data[index + 3];  // Alpha
+                    }
+                }
+
+                // وضع البيانات المموهة على الكانفاس
+                const outputImageData = new ImageData(blurredData, width, height);
+                ctx.putImageData(outputImageData, 0, 0);
+
+                // معالجة الإطار التالي
+                requestAnimationFrame(processFrame);
+            }
+
+            processFrame();
+        }
+    </script>
+</body>
+</html>

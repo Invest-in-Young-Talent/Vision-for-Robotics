@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>crop video and display on canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            display: block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>task3(crop video and display on canvas)></h1>
+<h2>result</h2>
+    <video id="video" width="640" height="360" controls>
+        <source src="C:\Users\ليلاس ابوعامر\Videos\test (1).mp4">
+        your browser does not support the video tag
+    </video>
+
+    <label for="canvasWidth">choose canvas width:</label>
+    <select id="canvasWidth">
+        <option value="320">320px</option>
+        <option value="640" selected>640px</option>
+        <option value="800">800px</option>
+        <option value="1024">1024px</option>
+    </select>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWidthSelect = document.getElementById('canvasWidth');
+
+        function updateCanvasSize() {
+            const selectedWidth = parseInt(canvasWidthSelect.value);
+            canvas.width = selectedWidth; // set the canvas width based on user selection
+            canvas.height = selectedWidth * (video.videoHeight / video.videoWidth); // maintain the aspect ratio
+        }
+
+        video.addEventListener('loadedmetadata', () => {
+            updateCanvasSize();
+        });
+
+        video.addEventListener('play', function() {
+            const cropX = 100;  // x coordinate for cropping
+            const cropY = 50;   // y coordinate for cropping
+            const cropWidth = 200; // width of the cropped area
+            const cropHeight = 150; // height of the cropped areea
+
+            function step() {
+                if (!video.paused && !video.ended) {
+                    // crop the video and display on canvas
+                    ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+                    requestAnimationFrame(step);
+                }
+            }
+            requestAnimationFrame(step);
+        });
+
+        canvasWidthSelect.addEventListener('change', () => {
+            updateCanvasSize();
+        });
+
+        // update canvas size when the browser window is resized
+        window.addEventListener('resize', () => {
+            updateCanvasSize();
+        });
+    </script>
+</body>
+</html>

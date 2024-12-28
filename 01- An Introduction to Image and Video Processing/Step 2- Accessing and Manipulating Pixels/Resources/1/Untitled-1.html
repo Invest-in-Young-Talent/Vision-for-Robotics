@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متوسط بكسلات الفيديو</title>
+</head>
+<body>
+    <video id="video" width="640" height="480" controls>
+        <source src="video.mp4"type="video/mp4">
+        متصفحك لا يدعم علامة الفيديو.
+    </video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        video.addEventListener('play', function() {
+            const processVideo = () => {
+                if (!video.paused && !video.ended) {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    computeAverageColors();
+                    requestAnimationFrame(processVideo);
+                }
+            };
+            requestAnimationFrame(processVideo);
+        });
+
+        function computeAverageColors() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const newData = new Uint8ClampedArray(data.length);
+
+            const width = imageData.width;
+            const height = imageData.height;
+
+            for (let y = 1; y < height - 1; y++) {
+                for (let x = 1; x < width - 1; x++) {
+                    const avgColor = getAverageColor(x, y, data, width);
+                    const index = (y * width + x) * 4;
+                    newData[index] = avgColor.r;     // R
+                    newData[index + 1] = avgColor.g; // G
+                    newData[index + 2] = avgColor.b; // B
+                    newData[index + 3] = data[index + 3]; // A
+                }
+            }
+
+            ctx.putImageData(new ImageData(newData, width, height), 0, 0);
+        }
+
+        function getAverageColor(x, y, data, width) {
+            let r = 0, g = 0, b = 0, count = 0;
+
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const xx = x + dx;
+                    const yy = y + dy;
+                    const index = (yy * width + xx) * 4;
+
+                    r += data[index];
+                    g += data[index + 1];
+                    b += data[index + 2];
+                    count++;
+                }
+            }
+
+            return {
+                r: Math.round(r / count),
+                g: Math.round(g / count),
+                b: Math.round(b / count),
+            };
+        }
+    </script>
+</body>
+</html>

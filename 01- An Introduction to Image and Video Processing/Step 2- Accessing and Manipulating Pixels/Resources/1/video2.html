@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عكس الألوان وضبط السطوع للفيديو</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        video {
+            /* عكس الألوان وضبط السطوع */
+            filter: invert(1) brightness(0.8);
+            width: 80%;
+            max-width: 600px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>فيديو بعكس الألوان وضبط السطوع </h1>
+    <video controls>
+        <source src="video.mp4" type="video/mp4">
+        متصفحك لا يدعم عرض الفيديو. يرجى استخدام متصفح حديث مثل Chrome أو Firefox.
+    </video>
+    <p>هذا الفيديو يتم عرضه بعكس الألوان وضبط السطوع.</p>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invert Colors and Adjust Brightness</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 80%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <video id="video"style="display:none;" src="video.mp4" muted =></video>
+    <canvas id="canvas"></canvas>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        video.addEventListener('loadedmetadata', setupCanvas);
+        video.addEventListener('play', renderFrame);
+
+        function setupCanvas() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            video.play();
+        }
+
+        function renderFrame() {
+            if (video.paused || video.ended) return;
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            invertColorsAndAdjustBrightness(50); // 50 هو قيمة للسطوع
+            requestAnimationFrame(renderFrame);
+        }
+
+        function invertColorsAndAdjustBrightness(brightness) {
+            const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = frame.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                // عكس الألوان
+                data[i] = 255 - data[i];     // Red
+                data[i + 1] = 255 - data[i + 1]; // Green
+                data[i + 2] = 255 - data[i + 2]; // Blue
+
+                // تعديل السطوع
+                data[i] = Math.min(255, data[i] + brightness);
+                data[i + 1] = Math.min(255, data[i + 1] + brightness);
+                data[i + 2] = Math.min(255, data[i + 2] + brightness);
+            }
+
+            ctx.putImageData(frame, 0, 0);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تأثير صبغة حمراء على الفيديو</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        canvas {
+            display: none; /* إخفاء الكانفاس */
+        }
+    </style>
+</head>
+<body>
+    <h1>تأثير صبغة حمراء على الفيديو</h1>
+    <video id="video" width="640" height="480" autoplay muted loop>
+        <source src="video.mp4" type="video/mp4">
+        متصفحك لا يدعم الفيديو.
+    </video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d',{willReadFrequently:true});
+
+        const processVideo = () => {
+            // رسم الفيديو على الكانفاس
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // الحصول على بيانات البكسل
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+
+            // زيادة كثافة اللون الأحمر
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = data[i] + 100; // R
+                data[i + 1] = data[i + 1] - 50; // G
+                data[i + 2] = data[i + 2] - 50; // B
+            }
+
+            // وضع البيانات المعدلة في الكانفاس
+            ctx.putImageData(imageData, 0, 0);
+            
+            // تكرار معالجة الإطار التالي
+            requestAnimationFrame(processVideo);
+        };
+
+        video.addEventListener('play', () => {
+            processVideo();
+        });
+    </script>
+</body>
+</html>

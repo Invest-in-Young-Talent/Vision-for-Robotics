@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="Viewport"
+        content="width=device-width,initial-scale=1.0">
+        <title>Video on Canvas</title>
+        <style>
+            canvas{
+                border: 1px solid black;
+            }
+</style>
+    </head>
+    <body>
+        <video id="Video" width="640" height="360" controls>
+            <source src="C:\Users\ليلاس ابوعامر\Videos\test (1).mp4">
+        </video>
+        <canvas id="canvas"width="640" height="360"></canvas>
+        <script>
+            const Video =
+            document.getElementById('Video');
+            const canvas=
+            document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            Video.addEventListener('play',
+            function(){
+                function step (){
+                    if (!Video.paused&& ! Video.ended) {
+                        ctx.drawImage(Video,0,0,canvas.width,canvas.height);
+                       
+requestAnimationFrame(step);
+                    }
+                }
+                requestAnimationFrame(step);
+
+            });
+            </script>
+    </body>
+</html>

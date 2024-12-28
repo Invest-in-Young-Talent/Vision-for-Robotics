@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض الفيديو على الكانفاس</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1></h1>
+    <video id="video" width="320" height="240" controls>
+        <source src="C:\Users\ليلاس ابوعامر\Videos\test (1).mp4"
+        متصفحك لا يدعم تشغيل الفيديو.
+    </video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const Context = canvas.getContext('2d');
+
+        video.addEventListener('play', function() {
+            const draw = function() {
+                if(!video.paused && ! video.ended){
+                       //تغيير الحجم الدينمايكي
+                Context.cleaRect(0,0,canvas.width,canvas.height);
+                context.drawImage(video,0,0,canvas.width,canvas.height);
+                requestAnimationFrame(draw);
+
+
+
+
+
+
+                }
+
+            };
+            requestAnimationFrame(draw);s
+
+    
+                
+            });
+            function resizeCanvas (width,height){
+                canvas.width = width;
+                canvas.height = height;
+            }
+        resizeCanvas(320,240);
+    </script>
+</body>
+</html>

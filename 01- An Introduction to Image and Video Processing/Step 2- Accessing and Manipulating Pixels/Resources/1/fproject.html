@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang ="en">
+    <head>
+        <meta charset ="UTF-8">
+        <meta name="Viewport"
+        content="width=device-width,initial-scale=1.0">
+        <title>draw rectangle and text</title>
+        <style>
+            canvas{
+                border: 1px solid black
+            }
+            </style>
+            
+    </head>
+    <body>
+        <h1>task1</h1>
+        <canvas id ="myCanvas" width="500" height="300"></canvas>
+              <h1>result</h1>
+        <script>
+            const canvas = 
+            document.getElementById('myCanvas');
+            const ctx =canvas.getContext('2d');
+            ctx.fillStyle= 'lightblue';
+            ctx.fillRect(50,50,400,200);
+
+            ctx.font = "30px Arial";
+            ctx.strokeStyle = "blake";
+            ctx.lineWidth= 2;
+
+            ctx.strokeText("hello canvace!",100,150);
+            </script>
+    </body>
+</html>

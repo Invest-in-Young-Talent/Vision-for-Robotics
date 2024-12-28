@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Video on Canvas</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+
+        canvas {
+            border: 1px solid black;
+            width: 80%; /* Set initial width */
+            height: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Video on Canvas</h1>
+    <video id="video" style="display:none;" src="C:\Users\ليلاس ابوعامر\Videos\test (1).mp4" muted>
+     </video>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set the canvas dimensions based on video metadata when loaded
+        video.addEventListener('loadedmetadata', () => {
+            resizeCanvas();
+            video.play();
+        });
+
+        // Resize canvas dynamically on window resize
+        window.addEventListener('resize', resizeCanvas);
+
+        function resizeCanvas() {
+            const aspectRatio = video.videoWidth / video.videoHeight;
+            const canvasWidth = window.innerWidth * 0.8; // 80% of window width
+            canvas.width = canvasWidth;
+            canvas.height = canvasWidth / aspectRatio; // Maintain aspect ratio
+        }
+
+        // Draw the video frame on the canvas
+        video.addEventListener('play', () => {
+            function drawFrame() {
+                if (!video.paused && !video.ended) {
+                    // Define cropping dimensions (you can adjust these values)
+                    const cropX = 0; // X coordinate to start crop
+                    const cropY = 0; // Y coordinate to start crop
+                    const cropWidth = video.videoWidth; // Width of the cropped area
+                    const cropHeight = video.videoHeight; // Height of the cropped area
+
+                    // Draw the video frame on canvas
+                    ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
+                    requestAnimationFrame(drawFrame);
+                }
+            }
+            drawFrame();
+        });
+    </script>
+    
+</body>
+</html>

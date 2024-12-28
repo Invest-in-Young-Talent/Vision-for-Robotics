@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video with Red Tint Effect</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 45%;
+            height: auto;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" src="video.mp4" muted style="display:none;"></video>
+    <canvas id="originalCanvas"></canvas>
+    <canvas id="tintedCanvas"></canvas>
+    <script>
+        const video = document.getElementById('video');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const tintedCanvas = document.getElementById('tintedCanvas');
+        const ctxOriginal = originalCanvas.getContext('2d');
+        const ctxTinted = tintedCanvas.getContext('2d');
+
+        video.addEventListener('loadedmetadata', setupCanvas);
+        video.addEventListener('play', renderFrame);
+
+        function setupCanvas() {
+            originalCanvas.width = video.videoWidth;
+            originalCanvas.height = video.videoHeight;
+            tintedCanvas.width = video.videoWidth;
+            tintedCanvas.height = video.videoHeight;
+            video.play();
+        }
+
+        function renderFrame() {
+            if (video.paused || video.ended) return;
+
+            // Draw the original video
+            ctxOriginal.drawImage(video, 0, 0, originalCanvas.width, originalCanvas.height);
+            
+            // Process the video and add the red tint
+            ctxTinted.drawImage(video, 0, 0, tintedCanvas.width, tintedCanvas.height);
+            applyRedTint();
+
+            requestAnimationFrame(renderFrame);
+        }
+
+        function applyRedTint() {
+            const frame = ctxTinted.getImageData(0, 0, tintedCanvas.width, tintedCanvas.height);
+            const data = frame.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                // Increase the red, and reduce green and blue more
+                data[i] = data[i] * 1.5;    // Increase red
+                data[i + 1] *= 0.3;         // Decrease green
+                data[i + 2] *= 0.3;         // Decrease blue
+            }
+
+            ctxTinted.putImageData(frame, 0, 0);
+        }
+    </script>
+</body>
+</html>

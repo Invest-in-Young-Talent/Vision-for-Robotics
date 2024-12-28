@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recover Pixel Data from the Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Draw a rectangle and retrieve pixel data</h1>
+    <canvas id="mycanvas" width="300" height="150"></canvas>
+    <button id="getpixelData">Get Pixel Data</button>
+    
+    <script>
+        // Get the canvas item and the drawing context
+        const canvas = document.getElementById('mycanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw rectangle on the canvas
+        ctx.fillStyle = 'blue'; // Set the fill color before drawing
+        ctx.fillRect(50, 50, 50, 50); // Corrected the parameters
+
+        // Button to retrieve pixel data
+        const button = document.getElementById('getpixelData'); // Corrected method to get the button
+        button.addEventListener('click', function() { // Corrected event listener syntax
+            const x = 50; // x position of the rectangle
+            const y = 50; // y position of the rectangle
+            const width = 50; // width of the rectangle
+            const height = 50; // height of the rectangle
+            
+            const imageData = ctx.getImageData(x, y, width, height);
+            const data = imageData.data;   
+            
+            // Log the first pixel's RGBA values
+            console.log(`Red: ${data[0]}, Green: ${data[1]}, Blue: ${data[2]}, Alpha: ${data[3]}`);
+            // Log the entire pixel data array
+            console.log('Pixel data array:', data);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق فلتر تدرج الرمادي</title>
+    <style>
+        canvas {
+            display: block;
+            margin: auto;
+        }
+        video {
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+<video id="video" width="640" height="360" crossorigin="anonymous" autoplay loop>
+    <source src="video.mp4" type="video/mp4">
+    متصفحك لا يدعم الفيديو.
+</video>
+<canvas id="canvas" width="640" height="360"></canvas>
+
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    video.addEventListener('play', function () {
+        draw(this, ctx, 640, 360);
+    }, false);
+
+    function draw(video, ctx, width, height) {
+        if (video.paused || video.ended) return false;
+        ctx.drawImage(video, 0, 0, width, height);
+        applyGrayScaleFilter(ctx, width, height);
+        requestAnimationFrame(() => draw(video, ctx, width, height));
+    }
+
+    function applyGrayScaleFilter(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = avg;       // Red
+            data[i + 1] = avg;   // Green
+            data[i + 2] = avg;   // Blue
+            // Alpha (data[i + 3]) remains unchanged
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+</script>
+
+</body>
+</html>

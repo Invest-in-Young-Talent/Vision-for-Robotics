@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grayscale Video</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            border: 1px solid black;
+            width: 80%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" style="display:none;" src="video.mp4" muted></video>
+    <canvas id="processedCanvas"></canvas>
+    <script>
+        const video = document.getElementById('video');
+        const processedCanvas = document.getElementById('processedCanvas');
+        const processedCtx = processedCanvas.getContext('2d');
+
+        video.addEventListener('loadedmetadata', initializeCanvas);
+        video.addEventListener('play', drawFrames);
+
+        function initializeCanvas() {
+            processedCanvas.width = video.videoWidth;
+            processedCanvas.height = video.videoHeight;
+            video.play();
+        }
+
+        function drawFrames() {
+            if (video.paused || video.ended) return;
+
+            processedCtx.drawImage(video, 0, 0, processedCanvas.width, processedCanvas.height);
+            processFrame();
+            requestAnimationFrame(drawFrames);
+        }
+
+        function processFrame() {
+            const frame = processedCtx.getImageData(0, 0, processedCanvas.width, processedCanvas.height);
+            const data = frame.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = data[i + 1] = data[i + 2] = avg; // تحويل الصورة إلى تدرج رمادي
+            }
+
+            processedCtx.putImageData(frame, 0, 0);
+        }
+    </script>
+</body>
+</html>
