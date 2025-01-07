@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Manipulation with Canvas</title>
+    <style>
+        #canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        canvas {
+            border: 1px solid #000;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls label, .controls input {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <video id="video" style="display: none;" loop autoplay muted>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <canvas id="canvas"></canvas>
+
+        <div class="controls">
+            <label for="scale">Scale:</label>
+            <input type="range" id="scale" min="0.5" max="2" step="0.1" value="1">
+
+            <label for="rotate">Rotate:</label>
+            <input type="range" id="rotate" min="0" max="360" step="1" value="0">
+
+            <label for="flip">Flip:</label>
+            <select id="flip">
+                <option value="none">None</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const scaleInput = document.getElementById('scale');
+        const rotateInput = document.getElementById('rotate');
+        const flipInput = document.getElementById('flip');
+
+        let scale = 1; // التكبير الافتراضي
+        let rotate = 0; // التدوير الافتراضي
+        let flip = 'none'; // القلب الافتراضي
+
+        // تحميل الفيديو وضبط الكانفس
+        video.addEventListener('loadeddata', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            video.play();
+            drawFrame();
+        });
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // حفظ الحالة الأصلية
+            ctx.save();
+
+            // تطبيق التحويلات
+            ctx.translate(canvas.width / 2, canvas.height / 2); // تحريك نقطة المرجع إلى المركز
+            ctx.rotate((rotate * Math.PI) / 180); // التدوير
+
+            if (flip === 'horizontal') {
+                ctx.scale(-1, 1); // القلب أفقيًا
+            } else if (flip === 'vertical') {
+                ctx.scale(1, -1); // القلب عموديًا
+            }
+
+            ctx.scale(scale, scale); // التكبير/التصغير
+
+            // رسم الفيديو
+            ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2);
+
+            // استعادة الحالة الأصلية
+            ctx.restore();
+
+            // تحديث الإطار التالي
+            requestAnimationFrame(drawFrame);
+        }
+
+        // الاستماع لتغييرات التحكمات
+        scaleInput.addEventListener('input', () => {
+            scale = parseFloat(scaleInput.value); // تحديث قيمة التكبير
+        });
+
+        rotateInput.addEventListener('input', () => {
+            rotate = parseFloat(rotateInput.value); // تحديث زاوية التدوير
+        });
+
+        flipInput.addEventListener('change', () => {
+            flip = flipInput.value; // تحديث وضع القلب
+        });
+    </script>
+</body>
+</html>

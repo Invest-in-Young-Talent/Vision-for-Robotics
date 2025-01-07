@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Transformations</title>
+    <style>
+        #canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        canvas {
+            border: 1px solid #000;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .controls button, .controls select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .controls label {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <video id="video" style="display: none;" loop autoplay muted>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <canvas id="canvas"></canvas>
+
+        <div class="controls">
+            <label>Scale:</label>
+            <button id="scale-up">+</button>
+            <button id="scale-down">-</button>
+
+            <label>Rotate:</label>
+            <button id="rotate-left">⟲</button>
+            <button id="rotate-right">⟳</button>
+
+            <label>Flip:</label>
+            <select id="flip">
+                <option value="none">None</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const scaleUpBtn = document.getElementById('scale-up');
+        const scaleDownBtn = document.getElementById('scale-down');
+        const rotateLeftBtn = document.getElementById('rotate-left');
+        const rotateRightBtn = document.getElementById('rotate-right');
+        const flipInput = document.getElementById('flip');
+
+        let scale = 1;
+        let rotate = 0;
+        let flip = 'none';
+
+        video.addEventListener('loadeddata', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            video.play();
+            drawFrame();
+        });
+
+        function drawFrame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // حفظ الحالة الأصلية
+            ctx.save();
+
+            // تحولات
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate((rotate * Math.PI) / 180);
+
+            if (flip === 'horizontal') {
+                ctx.scale(-1, 1);
+            } else if (flip === 'vertical') {
+                ctx.scale(1, -1);
+            }
+
+            ctx.scale(scale, scale);
+
+            // رسم الفيديو
+            ctx.drawImage(video, -video.videoWidth / 2, -video.videoHeight / 2);
+
+            // استعادة الحالة الأصلية
+            ctx.restore();
+
+            // تحديث الإطار التالي
+            requestAnimationFrame(drawFrame);
+        }
+
+        // التحكم بالتكبير/التصغير
+        scaleUpBtn.addEventListener('click', () => {
+            scale = Math.min(scale + 0.1, 2); // حد أعلى للتكبير
+        });
+
+        scaleDownBtn.addEventListener('click', () => {
+            scale = Math.max(scale - 0.1, 0.5); // حد أدنى للتصغير
+        });
+
+        // التحكم بالتدوير
+        rotateLeftBtn.addEventListener('click', () => {
+            rotate -= 10;
+        });
+
+        rotateRightBtn.addEventListener('click', () => {
+            rotate += 10;
+        });
+
+        // التحكم بالقلب
+        flipInput.addEventListener('change', (e) => {
+            flip = e.target.value;
+        });
+    </script>
+</body>
+</html>
