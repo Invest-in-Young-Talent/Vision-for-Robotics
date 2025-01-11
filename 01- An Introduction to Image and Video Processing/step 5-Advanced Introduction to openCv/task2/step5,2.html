@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اكتشاف الحركة باستخدام اختلاف الإطارات</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</head>
+<body>
+    <h2>اكتشاف الحركة باستخدام اختلاف الإطارات</h2>
+
+    <video id="videoInput" autoplay loop muted playsinline>
+        <source src="video.mp4" type="video/mp4">
+        المتصفح لا يدعم تشغيل الفيديو.
+    </video>
+    <canvas id="canvasOutput"></canvas>
+
+    <script>
+        cv['onRuntimeInitialized'] = () => {
+            const video = document.getElementById('videoInput');
+            const canvas = document.getElementById('canvasOutput');
+            const cap = new cv.VideoCapture(video);
+
+            // مصفوفات الإطارات
+            const frame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+            const prevFrame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+            const currentFrame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+            const diffFrame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+            const thresholdFrame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+
+            // إعدادات العرض
+            video.addEventListener('loadeddata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                // قراءة أول إطار كإطار سابق
+                cap.read(frame);
+                cv.cvtColor(frame, prevFrame, cv.COLOR_RGBA2GRAY);
+
+                function processVideo() {
+                    if (video.paused || video.ended) {
+                        frame.delete();
+                        prevFrame.delete();
+                        currentFrame.delete();
+                        diffFrame.delete();
+                        thresholdFrame.delete();
+                        return;
+                    }
+
+                    try {
+                        // قراءة الإطار الحالي
+                        cap.read(frame);
+                        cv.cvtColor(frame, currentFrame, cv.COLOR_RGBA2GRAY);
+
+                        // حساب الفرق المطلق بين الإطارين
+                        cv.absdiff(currentFrame, prevFrame, diffFrame);
+
+                        // تطبيق تحديد العتبة لتحديد الحركة
+                        cv.threshold(diffFrame, thresholdFrame, 25, 255, cv.THRESH_BINARY);
+
+                        // عرض النتيجة
+                        cv.imshow('canvasOutput', thresholdFrame);
+
+                        // نسخ الإطار الحالي ليصبح الإطار السابق
+                        currentFrame.copyTo(prevFrame);
+
+                        // استدعاء العملية للإطار التالي
+                        requestAnimationFrame(processVideo);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                processVideo();
+            });
+        };
+    </script>
+</body>
+</html>

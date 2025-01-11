@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اكتشاف البكسل الأكثر سطوعاً في الفيديو ورسم دائرة حوله</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</head>
+<body>
+    <h2>اكتشاف البكسل الأكثر سطوعاً في الفيديو ورسم دائرة حوله</h2>
+    <video id="videoInput" autoplay loop muted playsinline>
+        <source src="video.mp4" type="video/mp4">
+        المتصفح لا يدعم تشغيل الفيديو.
+    </video>
+    <canvas id="canvasOutput"></canvas>
+
+    <script>
+        cv['onRuntimeInitialized'] = () => {
+            const video = document.getElementById('videoInput');
+            const canvas = document.getElementById('canvasOutput');
+            const cap = new cv.VideoCapture(video);
+
+            // مصفوفات الإطارات
+            const frame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+            const grayFrame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+
+            // إعدادات العرض
+            video.addEventListener('loadeddata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                function processVideo() {
+                    if (video.paused || video.ended) {
+                        frame.delete();
+                        grayFrame.delete();
+                        return;
+                    }
+
+                    try {
+                        // قراءة الإطار الحالي
+                        cap.read(frame);
+
+                        // تحويل الإطار إلى تدرج الرمادي
+                        cv.cvtColor(frame, grayFrame, cv.COLOR_RGBA2GRAY);
+
+                        // استخدام minMaxLoc لتحديد البكسل الأكثر سطوعًا
+                        const minMax = cv.minMaxLoc(grayFrame);
+                        const maxLoc = minMax.maxLoc; // إحداثيات البكسل الأكثر سطوعاً
+
+                        // رسم دائرة حول البكسل الأكثر سطوعاً
+                        const color = new cv.Scalar(0, 0, 255, 255); // لون الدائرة (أحمر)
+                        const radius = 10; // نصف قطر الدائرة
+                        cv.circle(frame, maxLoc, radius, color, 2); // رسم الدائرة
+
+                        // عرض الإطار المعدل على القماش
+                        cv.imshow(canvas, frame);
+
+                        // استدعاء العملية للإطار التالي
+                        requestAnimationFrame(processVideo);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                processVideo();
+            });
+        };
+    </script>
+</body>
+</html>

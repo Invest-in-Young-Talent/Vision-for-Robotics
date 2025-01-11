@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التدرج الرمادي، تحديد العتبة، واكتشاف المحيط</title>
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</head>
+<body>
+    <h2>تحويل التدرج الرمادي، تحديد العتبات، واكتشاف المحيط</h2>
+    
+    <!-- إعداد التحكم -->
+    <label for="threshold">قيمة العتبة:</label>
+    <input type="range" id="threshold" min="0" max="255" value="128" step="1">
+    <span id="thresholdValue">128</span>
+    <br><br>
+
+    <!-- تشغيل الفيديو -->
+    <video id="videoInput" autoplay loop muted playsinline>
+        <source src="video.mp4" type="video/mp4">
+        المتصفح لا يدعم تشغيل الفيديو.
+    </video>
+    <!-- عرض النتيجة -->
+    <canvas id="canvasOutput"></canvas>
+
+    <script>
+        const video = document.getElementById('videoInput');
+        const canvas = document.getElementById('canvasOutput');
+        const thresholdSlider = document.getElementById('threshold');
+        const thresholdValue = document.getElementById('thresholdValue');
+
+        // تحديث قيمة العتبة عند تغيير شريط التمرير
+        thresholdSlider.addEventListener('input', () => {
+            thresholdValue.textContent = thresholdSlider.value;
+        });
+
+        cv['onRuntimeInitialized'] = () => {
+            console.log("تم تحميل مكتبة OpenCV.js");
+
+            // إعداد OpenCV.js
+            const cap = new cv.VideoCapture(video);
+            const frame = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC4);
+            const gray = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+            const binary = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+            const edges = new cv.Mat(video.videoHeight, video.videoWidth, cv.CV_8UC1);
+
+            video.addEventListener('loadeddata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                function processVideo() {
+                    if (video.paused || video.ended) {
+                        frame.delete();
+                        gray.delete();
+                        binary.delete();
+                        edges.delete();
+                        return;
+                    }
+
+                    try {
+                        cap.read(frame); // قراءة الإطار
+                        cv.cvtColor(frame, gray, cv.COLOR_RGBA2GRAY); // تحويل إلى تدرج الرمادي
+
+                        // تحديد العتبة
+                        const threshold = parseInt(thresholdSlider.value, 10);
+                        cv.threshold(gray, binary, threshold, 255, cv.THRESH_BINARY);
+
+                        // اكتشاف المحيطات
+                        cv.Canny(binary, edges, 50, 150);
+
+                        // عرض النتيجة
+                        cv.imshow('canvasOutput', edges);
+
+                        // استدعاء العملية مرة أخرى
+                        requestAnimationFrame(processVideo);
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+
+                processVideo();
+            });
+        };
+    </script>
+</body>
+</html>
